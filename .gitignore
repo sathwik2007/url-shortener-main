@@ -1,0 +1,91 @@
+# Kiro IDE files
+.kiro/
+
+# VS Code files
+.vscode/
+
+# Project planning files (keep private)
+project-plan.md
+
+# Maven
+backend/*/target/
+backend/*/.mvn/wrapper/maven-wrapper.jar
+backend/*/.mvn/wrapper/maven-wrapper.properties
+backend/*/.mvn/wrapper/MavenWrapperDownloader.java
+
+# IDE files
+backend/*/.idea/
+backend/*/*.iws
+backend/*/*.iml
+backend/*/*.ipr
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+backend/*/logs/
+backend/*/*.log
+backend/*/spring.log
+
+# Runtime data
+backend/*/pids
+backend/*/*.pid
+backend/*/*.seed
+backend/*/tmp/
+
+# Application properties with sensitive data
+backend/*/src/main/resources/application.properties
+backend/*/src/main/resources/application-prod.properties
+backend/*/src/main/resources/application-local.properties
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Compiled class files
+backend/*/*.class
+
+# Package files
+backend/*/*.jar
+backend/*/*.war
+backend/*/*.nar
+backend/*/*.ear
+backend/*/*.zip
+backend/*/*.tar.gz
+backend/*/*.rar
+
+# JVM Crash logs
+backend/*/hs_err_pid*
+
+# Spring Boot
+backend/*/HELP.md
+backend/*/mvnw
+backend/*/mvnw.cmd
+
+# Node.js (for future frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+build/
+
+# Production builds
+dist/

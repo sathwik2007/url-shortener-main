@@ -1,0 +1,25 @@
+spring.application.name=url-shortener-backend
+
+# Server Configuration
+server.port=8080
+
+# Application Configuration
+app.base-url=${BASE_URL:http://localhost:8080}
+app.cache.ttl=86400
+app.cors.allowed-origins=${CORS_ORIGINS:http://localhost:3000}
+
+# Configuring Data Source Properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/urlshortener
+spring.datasource.username=${DB_USERNAME:your_username}
+spring.datasource.password=${DB_PASSWORD:your_password}
+
+# Connecting to PostgreSQL database with Spring Data JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQL81Dialect
+
+# Redis Configuration
+spring.data.redis.host=${REDIS_HOST:localhost}
+spring.data.redis.port=${REDIS_PORT:6379}
+spring.data.redis.timeout=2000ms
