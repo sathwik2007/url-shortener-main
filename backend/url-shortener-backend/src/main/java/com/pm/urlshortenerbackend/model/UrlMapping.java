@@ -12,10 +12,11 @@ import java.time.LocalDateTime;
  * Project: url-shortener-backend
  */
 @Entity
+@SequenceGenerator(name = "url_seq", sequenceName = "url_sequence", allocationSize = 1)
 @Table(name = "url_mappings")
 public class UrlMapping {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "url_seq")
     private long id;
 
     @Column(unique = true, nullable = false)
