@@ -12,8 +12,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class IdGenerationService {
-    @Autowired
-    private UrlMappingRepository urlMappingRepository;
+    private final UrlMappingRepository urlMappingRepository;
+
+    public IdGenerationService(UrlMappingRepository urlMappingRepository) {
+        this.urlMappingRepository = urlMappingRepository;
+    }
 
     public String generateUniqueId(long value) {
         String shortCode = Base62Util.encode(value);
