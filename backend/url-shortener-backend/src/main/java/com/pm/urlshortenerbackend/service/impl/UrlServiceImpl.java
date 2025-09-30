@@ -8,7 +8,6 @@ import com.pm.urlshortenerbackend.exception.UrlNotFoundException;
 import com.pm.urlshortenerbackend.model.UrlMapping;
 import com.pm.urlshortenerbackend.repository.UrlMappingRepository;
 import com.pm.urlshortenerbackend.service.CacheService;
-import com.pm.urlshortenerbackend.service.IdGenerationService;
 import com.pm.urlshortenerbackend.service.UrlService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,7 @@ import java.util.Optional;
 public class UrlServiceImpl implements UrlService {
 
     private final UrlMappingRepository repository;
-    private final IdGenerationService idGenerationService;
+    private final IdGenerationServiceImpl idGenerationServiceImpl;
     private final CacheService cacheService;
 
     private final String baseUrl;
@@ -41,14 +40,14 @@ public class UrlServiceImpl implements UrlService {
     private final boolean enableDuplicateDetection;
 
     public UrlServiceImpl(UrlMappingRepository repository,
-                          IdGenerationService idGenerationService,
+                          IdGenerationServiceImpl idGenerationServiceImpl,
                           CacheService cacheService,
                           @Value("${app.base-url}") String baseUrl,
                           @Value("${app.url.max-length:2048}") int maxLength,
                           @Value("${app.url.cache-ttl:3600}") long cacheTtl,
                           @Value("${app.url.enable-duplicate-detection:true}") boolean enableDuplicateDetection) {
         this.repository = repository;
-        this.idGenerationService = idGenerationService;
+        this.idGenerationServiceImpl = idGenerationServiceImpl;
         this.cacheService = cacheService;
         this.baseUrl = baseUrl;
         this.maxLength = maxLength;
@@ -68,13 +67,13 @@ public class UrlServiceImpl implements UrlService {
             }
         }
 
+        String shortCode = idGenerationServiceImpl.generateUniqueShortCode();
+
         UrlMapping mapping = new UrlMapping();
         mapping.setOriginalUrl(originalUrl);
         mapping.setCreatedAt(LocalDateTime.now());
-        repository.save(mapping);
-
-        String shortCode = idGenerationService.generateUniqueId(mapping.getId());
         mapping.setShortCode(shortCode);
+
         repository.save(mapping);
 
         cacheService.putUrlMapping(shortCode, mapping, cacheTtl);
