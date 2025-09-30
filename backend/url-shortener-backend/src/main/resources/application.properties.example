@@ -6,7 +6,12 @@ server.port=8080
 # Application Configuration
 app.base-url=${BASE_URL:http://localhost:8080}
 app.cache.ttl=86400
-app.cors.allowed-origins=${CORS_ORIGINS:http://localhost:3000}
+# CORS Configuration for Next.js Frontend
+app.cors.allowed-origins=${CORS_ORIGINS:http://localhost:3000,http://localhost:3001}
+app.cors.allowed-methods=${CORS_METHODS:GET,POST,PUT,DELETE,OPTIONS}
+app.cors.allowed-headers=${CORS_HEADERS:*}
+app.cors.allow-credentials=${CORS_CREDENTIALS:true}
+app.cors.max-age=${CORS_MAX_AGE:3600}
 
 # Configuring Data Source Properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/urlshortener
