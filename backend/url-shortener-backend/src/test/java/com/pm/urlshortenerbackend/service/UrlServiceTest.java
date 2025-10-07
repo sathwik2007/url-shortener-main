@@ -9,6 +9,7 @@ import com.pm.urlshortenerbackend.model.UrlMapping;
 import com.pm.urlshortenerbackend.repository.UrlMappingRepository;
 import com.pm.urlshortenerbackend.service.impl.IdGenerationServiceImpl;
 import com.pm.urlshortenerbackend.service.impl.UrlServiceImpl;
+import io.micrometer.core.instrument.Timer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -36,6 +37,9 @@ public class UrlServiceTest {
     @Mock
     private CacheService cacheService;
 
+    @Mock
+    private com.pm.urlshortenerbackend.health.UrlShortenerMetrics metrics;
+
     private UrlService urlService;
 
     private final String baseUrl = "http://localhost:8080";
@@ -46,10 +50,17 @@ public class UrlServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        
+        // Mock timer behavior
+        Timer.Sample mockSample = mock(Timer.Sample.class);
+        when(metrics.startUrlCreationTimer()).thenReturn(mockSample);
+        when(metrics.startUrlRetrievalTimer()).thenReturn(mockSample);
+        
         urlService = new UrlServiceImpl(
                 repository,
                 idGenerationServiceImpl,
                 cacheService,
+                metrics,
                 baseUrl,
                 maxLength,
                 cacheTtl,
@@ -317,6 +328,7 @@ public class UrlServiceTest {
                 repository,
                 idGenerationServiceImpl,
                 cacheService,
+                metrics,
                 baseUrl,
                 maxLength,
                 cacheTtl,
