@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pm.urlshortenerbackend.dto.CreateUrlRequest;
 import com.pm.urlshortenerbackend.dto.CreateUrlResponse;
 import com.pm.urlshortenerbackend.exception.InvalidUrlException;
-import com.pm.urlshortenerbackend.exception.ShortCodeNotFoundException;
+import com.pm.urlshortenerbackend.exception.UrlNotFoundException;
 import com.pm.urlshortenerbackend.service.UrlService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -325,9 +325,8 @@ public class UrlControllerIntegrationTest {
                 .andExpect(jsonPath("$.originalUrl").isNotEmpty())
                 .andExpect(jsonPath("$.createdAt").isNotEmpty());
     }
-}
-    // ===
-======= Task 6.2 Tests: GET /{shortCode} Redirect Endpoint ==========
+
+    // ========== Task 6.2 Tests: GET /{shortCode} Redirect Endpoint ==========
 
     @Test
     void testRedirectToOriginalUrl_Success() throws Exception {
@@ -380,7 +379,7 @@ public class UrlControllerIntegrationTest {
         String shortCode = "notfound";
 
         when(urlService.getOriginalUrl(shortCode))
-                .thenThrow(new ShortCodeNotFoundException("Short code not found: " + shortCode));
+                .thenThrow(new UrlNotFoundException("Short code not found: " + shortCode));
 
         // Act & Assert
         mockMvc.perform(get("/" + shortCode))
@@ -556,3 +555,4 @@ public class UrlControllerIntegrationTest {
                     .andExpect(header().string("Location", originalUrl));
         }
     }
+}
