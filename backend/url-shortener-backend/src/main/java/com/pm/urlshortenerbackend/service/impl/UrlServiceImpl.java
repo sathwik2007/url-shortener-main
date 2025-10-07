@@ -117,7 +117,7 @@ public class UrlServiceImpl implements UrlService {
     private CreateUrlResponse buildResponse(UrlMapping mapping) {
         return new CreateUrlResponse(
             mapping.getShortCode(),
-            baseUrl + "/" + mapping.getShortCode(),
+            baseUrl + "/api/" + mapping.getShortCode(),
             mapping.getOriginalUrl(),
             mapping.getCreatedAt()
         );
