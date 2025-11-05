@@ -2,7 +2,7 @@ package com.pm.urlshortenerbackend.config;
 
 import com.pm.urlshortenerbackend.security.JwtAuthenticationEntryPoint;
 import com.pm.urlshortenerbackend.security.JwtAuthenticationFilter;
-import com.pm.urlshortenerbackend.security.TemporaryUserDetailsService;
+import com.pm.urlshortenerbackend.service.impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,21 +31,19 @@ public class SecurityConfig {
     
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final UserDetailsServiceImpl userDetailsService;
 
     public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, 
-                         CorsConfigurationSource corsConfigurationSource) {
+                         CorsConfigurationSource corsConfigurationSource,
+                          UserDetailsServiceImpl userDetailsService) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.corsConfigurationSource = corsConfigurationSource;
+        this.userDetailsService = userDetailsService;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        return new TemporaryUserDetailsService(passwordEncoder);
     }
 
     @Bean
