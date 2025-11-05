@@ -43,10 +43,10 @@ public class UrlMapping {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
-    @Column(name = "click_count", nullable = false)
+    @Column(name = "click_count", nullable = true)
     private Long clickCount = 0L;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active", nullable = true)
     private Boolean isActive = true;
 
     public UrlMapping() {
