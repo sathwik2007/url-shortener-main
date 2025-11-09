@@ -53,4 +53,6 @@ public interface UrlMappingRepository extends JpaRepository<UrlMapping, Long> {
 
     @Query("SELECT u FROM UrlMapping u WHERE u.owner = :owner AND u.clickCount > :minClicks ORDER BY u.clickCount DESC")
     List<UrlMapping> findPopularUrlsByOwner(@Param("owner") User owner, @Param("minClicks") Long minClicks);
+
+    Optional<UrlMapping> findByOriginalUrlAndOwner(String originalUrl, User owner);
 }

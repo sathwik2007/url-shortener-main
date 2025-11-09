@@ -17,6 +17,7 @@ public class UrlShortenerMetrics {
     
     private final Counter urlCreationCounter;
     private final Counter urlRetrievalCounter;
+    private final Counter urlDeactivationCounter;
     private final Counter cacheHitCounter;
     private final Counter cacheMissCounter;
     private final Counter errorCounter;
@@ -31,6 +32,10 @@ public class UrlShortenerMetrics {
         this.urlRetrievalCounter = Counter.builder("url_shortener_urls_retrieved_total")
             .description("Total number of URLs retrieved")
             .register(meterRegistry);
+
+        this.urlDeactivationCounter = Counter.builder("url_deactivation_total")
+                .description("Total number of URLs deactivated due to expiration")
+                .register(meterRegistry);
             
         this.cacheHitCounter = Counter.builder("url_shortener_cache_hits_total")
             .description("Total number of cache hits")
@@ -60,6 +65,8 @@ public class UrlShortenerMetrics {
     public void incrementUrlRetrieval() {
         urlRetrievalCounter.increment();
     }
+
+    public void incrementUrlDeactivation(int count) { urlDeactivationCounter.increment(count); }
     
     public void incrementCacheHit() {
         cacheHitCounter.increment();

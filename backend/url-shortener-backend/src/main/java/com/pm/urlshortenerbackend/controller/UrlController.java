@@ -2,6 +2,8 @@ package com.pm.urlshortenerbackend.controller;
 
 import com.pm.urlshortenerbackend.dto.CreateUrlRequest;
 import com.pm.urlshortenerbackend.dto.CreateUrlResponse;
+import com.pm.urlshortenerbackend.exception.UrlExpiredException;
+import com.pm.urlshortenerbackend.exception.UrlNotFoundException;
 import com.pm.urlshortenerbackend.service.UrlService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -11,6 +13,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 /**
  * Author: sathwikpillalamarri
@@ -47,17 +51,27 @@ public class UrlController {
             @Pattern(regexp = "^[0-9a-zA-Z]{1,10}$", message = "Invalid Short Code Format")
             String shortCode
     ) {
-        log.info("Redirect request for shortCode: {}", shortCode);
-        long start = System.currentTimeMillis();
+        try {
+            log.info("Redirect request for shortCode: {}", shortCode);
+            long start = System.currentTimeMillis();
 
-        String originalUrl = urlService.getOriginalUrl(shortCode);
+            String originalUrl = urlService.getOriginalUrl(shortCode);
 
-        long elapsed = System.currentTimeMillis() - start;
-        log.info("Redirected {} -> {} in {} ms", shortCode, originalUrl, elapsed);
+            long elapsed = System.currentTimeMillis() - start;
+            log.info("Redirected {} -> {} in {} ms", shortCode, originalUrl, elapsed);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.LOCATION, originalUrl);
-
-        return new ResponseEntity<>(headers, HttpStatus.MOVED_PERMANENTLY);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(originalUrl))
+                    .build();
+        } catch (UrlNotFoundException e) {
+            log.warn("Short code not found: {}", shortCode);
+            return ResponseEntity.notFound().build();
+        } catch (UrlExpiredException e) {
+            log.warn("Short code expired: {}", shortCode);
+            return ResponseEntity.status(HttpStatus.GONE).build();
+        } catch (Exception e) {
+            log.error("Error redirecting for short code: {}", shortCode, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
