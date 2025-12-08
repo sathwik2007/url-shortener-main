@@ -1,80 +1,61 @@
 package com.pm.urlshortenerbackend.controller;
 
 import com.pm.urlshortenerbackend.dto.ClickEventData;
-import com.pm.urlshortenerbackend.dto.CreateUrlRequest;
-import com.pm.urlshortenerbackend.dto.CreateUrlResponse;
 import com.pm.urlshortenerbackend.exception.UrlExpiredException;
 import com.pm.urlshortenerbackend.exception.UrlNotFoundException;
+import com.pm.urlshortenerbackend.health.UrlShortenerMetrics;
 import com.pm.urlshortenerbackend.service.ClickTrackingService;
 import com.pm.urlshortenerbackend.service.UrlService;
+import io.micrometer.core.instrument.Timer;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 
 /**
- * Author: sathwikpillalamarri
- * Date: 9/29/25
+ * Author: Sathwik Pillalamarri
+ * Date: 12/2/25
  * Project: url-shortener-backend
  */
 @RestController
-@RequestMapping("/api")
-public class UrlController {
-    private static final Logger log = LoggerFactory.getLogger(UrlController.class);
+public class RedirectController {
+    private static final Logger log = LoggerFactory.getLogger(RedirectController.class);
     private final UrlService urlService;
     private final ClickTrackingService clickTrackingService;
+    private final UrlShortenerMetrics metrics;
 
-    public UrlController(UrlService urlService, ClickTrackingService clickTrackingService) {
+    public RedirectController(UrlService urlService, ClickTrackingService clickTrackingService, UrlShortenerMetrics urlShortenerMetrics) {
         this.urlService = urlService;
         this.clickTrackingService = clickTrackingService;
-    }
-
-    @PostMapping("/links")
-    public ResponseEntity<CreateUrlResponse> createShortUrl(@Valid @RequestBody CreateUrlRequest request) {
-        log.info("Received createShortUrl request for: {}", request.getOriginalUrl());
-
-        long start = System.currentTimeMillis();
-
-        CreateUrlResponse response = urlService.createShortUrl(request);
-
-        long elapsed = System.currentTimeMillis() - start;
-        log.info("Generated short URL: {} in {} ms", response.getShortUrl(), elapsed);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        this.metrics = urlShortenerMetrics;
     }
 
     @GetMapping("/{shortCode}")
-    public ResponseEntity<Void> redirectToOriginalUrl(
+    public ResponseEntity<Void> redirect(
             @PathVariable
-            @Pattern(regexp = "^[0-9a-zA-Z]{1,10}$", message = "Invalid Short Code Format")
+            @Pattern(regexp = "^[0-9a-zA-Z]{1,10}$", message = "Invalid short code format")
             String shortCode,
             HttpServletRequest request
     ) {
+        Timer.Sample sample = metrics.startRedirectTimer();
         try {
-            log.info("Redirect request for shortCode: {}", shortCode);
-            long start = System.currentTimeMillis();
+            log.debug("Public redirect request for shortCode: {}", shortCode);
 
             String originalUrl = urlService.getOriginalUrl(shortCode);
 
-            try {
-                ClickEventData clickEventData = extractClickEventData(request);
-                clickTrackingService.logClick(shortCode, clickEventData);
-            } catch (Exception e) {
-                log.error("Failed to initiate click tracking for shortCode: {}, continuing with redirect", shortCode);
-            }
+            ClickEventData clickEventData = extractClickEventData(request);
+            clickTrackingService.logClick(shortCode, clickEventData);
 
-            long elapsed = System.currentTimeMillis() - start;
-            log.info("Redirected {} -> {} in {} ms", shortCode, originalUrl, elapsed);
+            log.debug("Redirecting {} to {}", shortCode, originalUrl);
 
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create(originalUrl))
-                    .build();
+            return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(originalUrl)).build();
         } catch (UrlNotFoundException e) {
             log.warn("Short code not found: {}", shortCode);
             return ResponseEntity.notFound().build();
@@ -84,6 +65,8 @@ public class UrlController {
         } catch (Exception e) {
             log.error("Error redirecting for short code: {}", shortCode, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } finally {
+            metrics.recordRedirectTime(sample);
         }
     }
 
@@ -96,13 +79,13 @@ public class UrlController {
 
     private String extractIpAddress(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-Forwarded-For");
-        if(ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
             ipAddress = request.getHeader("X-Real-IP");
         }
-        if(ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
             ipAddress = request.getRemoteAddr();
         }
-        if(ipAddress != null && ipAddress.contains(",")) {
+        if (ipAddress != null && ipAddress.contains(",")) {
             ipAddress = ipAddress.split(",")[0].trim();
         }
 

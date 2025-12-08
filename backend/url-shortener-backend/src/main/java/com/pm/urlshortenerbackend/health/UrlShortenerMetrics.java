@@ -21,8 +21,12 @@ public class UrlShortenerMetrics {
     private final Counter cacheHitCounter;
     private final Counter cacheMissCounter;
     private final Counter errorCounter;
+    private final Counter clickTrackingSuccessCounter;
+    private final Counter clickTrackingFailureCounter;
+    private final Timer clickTrackingTimer;
     private final Timer urlCreationTimer;
     private final Timer urlRetrievalTimer;
+    private final Timer redirectTimer;
     
     public UrlShortenerMetrics(MeterRegistry meterRegistry) {
         this.urlCreationCounter = Counter.builder("url_shortener_urls_created_total")
@@ -48,6 +52,14 @@ public class UrlShortenerMetrics {
         this.errorCounter = Counter.builder("url_shortener_errors_total")
             .description("Total number of errors")
             .register(meterRegistry);
+
+        this.clickTrackingSuccessCounter = Counter.builder("click_tracking_success_total")
+                .description("Total number of successful click tracking operations")
+                .register(meterRegistry);
+
+        this.clickTrackingFailureCounter = Counter.builder("click_tracking_failure_total")
+                .description("Total number of failed click tracking operations")
+                .register(meterRegistry);
             
         this.urlCreationTimer = Timer.builder("url_shortener_url_creation_duration")
             .description("Time taken to create URLs")
@@ -56,6 +68,13 @@ public class UrlShortenerMetrics {
         this.urlRetrievalTimer = Timer.builder("url_shortener_url_retrieval_duration")
             .description("Time taken to retrieve URLs")
             .register(meterRegistry);
+
+        this.clickTrackingTimer = Timer.builder("click_tracking_duration")
+                .description("Time taken to log click events")
+                .register(meterRegistry);
+        this.redirectTimer = Timer.builder("url_redirect_duration")
+                .description("Time taken to process redirect requests")
+                .register(meterRegistry);
     }
     
     public void incrementUrlCreation() {
@@ -79,6 +98,10 @@ public class UrlShortenerMetrics {
     public void incrementError() {
         errorCounter.increment();
     }
+
+    public void incrementClickTrackingSuccess() {clickTrackingSuccessCounter.increment(); }
+
+    public void incrementClickTrackingFailure() { clickTrackingFailureCounter.increment(); }
     
     public Timer.Sample startUrlCreationTimer() {
         return Timer.start();
@@ -95,4 +118,12 @@ public class UrlShortenerMetrics {
     public void recordUrlRetrievalTime(Timer.Sample sample) {
         sample.stop(urlRetrievalTimer);
     }
+
+    public Timer.Sample startClickTrackingTimer() { return Timer.start(); }
+
+    public void recordClickTrackingTime(Timer.Sample sample) { sample.stop(clickTrackingTimer); }
+
+    public Timer.Sample startRedirectTimer() { return Timer.start(); }
+
+    public void recordRedirectTime(Timer.Sample sample) { sample.stop(redirectTimer); }
 }

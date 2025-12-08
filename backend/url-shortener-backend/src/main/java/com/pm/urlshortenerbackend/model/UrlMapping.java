@@ -5,6 +5,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -48,6 +50,9 @@ public class UrlMapping {
 
     @Column(name = "is_active", nullable = true)
     private Boolean isActive = true;
+
+    @OneToMany(mappedBy = "urlMapping", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ClickEvent> clickEvents = new ArrayList<>();
 
     public UrlMapping() {
     }
@@ -134,6 +139,14 @@ public class UrlMapping {
         isActive = active;
     }
 
+    public List<ClickEvent> getClickEvents() {
+        return clickEvents;
+    }
+
+    public void setClickEvents(List<ClickEvent> clickEvents) {
+        this.clickEvents = clickEvents;
+    }
+
     //Utility Methods
     public boolean isExpired() {
         return expiresAt != null && LocalDateTime.now().isAfter(expiresAt);
@@ -153,6 +166,11 @@ public class UrlMapping {
 
     public boolean isAnonymous() {
         return owner == null;
+    }
+
+    public void addClickEvent(ClickEvent clickEvent) {
+        clickEvents.add(clickEvent);
+        clickEvent.setUrlMapping(this);
     }
 
     @Override

@@ -68,7 +68,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/{shortCode}").permitAll()
+                        .requestMatchers("/{shortCode}").permitAll() // Public redirect
+                        .requestMatchers("/api/{shortCode}").permitAll() // API Redirect
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/**").authenticated()
