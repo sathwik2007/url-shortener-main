@@ -114,4 +114,21 @@ public class CacheServiceImpl implements CacheService {
     public boolean existsUrlMapping(String shortCode) {
         return exists(URL_PREFIX + shortCode);
     }
+
+
+    @Override
+    public void evictPattern(String pattern) {
+        try {
+            // For Redis, use SCAN with pattern matching
+            var keys = redisTemplate.keys(pattern + "*");
+            if (keys != null && !keys.isEmpty()) {
+                redisTemplate.delete(keys);
+                log.debug("Evicted {} cache keys matching pattern: {}", keys.size(), pattern);
+            }
+        } catch (RedisConnectionFailureException e) {
+            log.warn("Redis unavailable while EVICT pattern={} -> {}", pattern, e.getMessage());
+        } catch (DataAccessException e) {
+            log.error("Redis data access error while EVICT pattern={} -> {}", pattern, e.getMessage());
+        }
+    }
 }

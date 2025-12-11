@@ -23,10 +23,14 @@ public class UrlShortenerMetrics {
     private final Counter errorCounter;
     private final Counter clickTrackingSuccessCounter;
     private final Counter clickTrackingFailureCounter;
+    private final Counter analyticsRequestCounter;
+    private final Counter analyticsCacheHitCounter;
+    private final Counter analyticsCacheMissCounter;
     private final Timer clickTrackingTimer;
     private final Timer urlCreationTimer;
     private final Timer urlRetrievalTimer;
     private final Timer redirectTimer;
+    private final Timer analyticsCalculationTimer;
     
     public UrlShortenerMetrics(MeterRegistry meterRegistry) {
         this.urlCreationCounter = Counter.builder("url_shortener_urls_created_total")
@@ -60,6 +64,18 @@ public class UrlShortenerMetrics {
         this.clickTrackingFailureCounter = Counter.builder("click_tracking_failure_total")
                 .description("Total number of failed click tracking operations")
                 .register(meterRegistry);
+
+        this.analyticsRequestCounter = Counter.builder("analytics_request_total")
+                .description("Total number of analytics requests")
+                .register(meterRegistry);
+
+        this.analyticsCacheHitCounter = Counter.builder("analytics_cache_hit_total")
+                .description("Total number of analytics cache hits")
+                .register(meterRegistry);
+
+        this.analyticsCacheMissCounter = Counter.builder("analytics_cache_misses_total")
+                .description("Total number of analytics cache misses")
+                .register(meterRegistry);
             
         this.urlCreationTimer = Timer.builder("url_shortener_url_creation_duration")
             .description("Time taken to create URLs")
@@ -72,8 +88,13 @@ public class UrlShortenerMetrics {
         this.clickTrackingTimer = Timer.builder("click_tracking_duration")
                 .description("Time taken to log click events")
                 .register(meterRegistry);
+
         this.redirectTimer = Timer.builder("url_redirect_duration")
                 .description("Time taken to process redirect requests")
+                .register(meterRegistry);
+
+        this.analyticsCalculationTimer = Timer.builder("analytics_calculation_duration")
+                .description("Time to calculate analytics")
                 .register(meterRegistry);
     }
     
@@ -102,6 +123,12 @@ public class UrlShortenerMetrics {
     public void incrementClickTrackingSuccess() {clickTrackingSuccessCounter.increment(); }
 
     public void incrementClickTrackingFailure() { clickTrackingFailureCounter.increment(); }
+
+    public void incrementAnalyticsRequest() { analyticsRequestCounter.increment(); }
+
+    public void incrementAnalyticsCacheHit() { analyticsCacheHitCounter.increment(); }
+
+    public void incrementAnalyticsCacheMiss() { analyticsCacheMissCounter.increment(); }
     
     public Timer.Sample startUrlCreationTimer() {
         return Timer.start();
@@ -126,4 +153,8 @@ public class UrlShortenerMetrics {
     public Timer.Sample startRedirectTimer() { return Timer.start(); }
 
     public void recordRedirectTime(Timer.Sample sample) { sample.stop(redirectTimer); }
+
+    public Timer.Sample startAnalyticsCalculationTimer() { return Timer.start(); }
+
+    public void recordAnalyticsCalculationTime(Timer.Sample sample) { sample.stop(analyticsCalculationTimer); }
 }

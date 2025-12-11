@@ -23,4 +23,6 @@ public interface CacheService {
     boolean deleteUrlMapping(String shortCode);
 
     boolean existsUrlMapping(String shortCode);
+
+    void evictPattern(String pattern);
 }

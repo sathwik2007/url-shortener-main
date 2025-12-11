@@ -45,10 +45,14 @@ public class RedirectPerformanceTest {
         // Measure redirect time with click tracking
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
         when(request.getHeader("User-Agent")).thenReturn("Test Agent");
+        when(request.getHeader("Referer")).thenReturn(null);
 
         long startWith = System.nanoTime();
         String url2 = urlService.getOriginalUrl(shortCode);
-        clickTrackingService.logClick(shortCode, request);
+        // Create ClickEventData from request
+        com.pm.urlshortenerbackend.dto.ClickEventData clickEventData = 
+            new com.pm.urlshortenerbackend.dto.ClickEventData("127.0.0.1", "Test Agent", null);
+        clickTrackingService.logClick(shortCode, clickEventData);
         long timeWith = System.nanoTime() - startWith;
 
         // Verify redirect time is not significantly impacted

@@ -2,6 +2,7 @@ package com.pm.urlshortenerbackend.service.impl;
 
 import com.pm.urlshortenerbackend.model.User;
 import com.pm.urlshortenerbackend.repository.UserRepository;
+import com.pm.urlshortenerbackend.security.UserPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,7 +43,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         log.debug("User found: {} (ID: {})", user.getEmail(), user.getId());
 
-        return createUserPrincipal(user);
+        return new UserPrincipal(user);
     }
 
     private UserDetails createUserPrincipal(User user) {

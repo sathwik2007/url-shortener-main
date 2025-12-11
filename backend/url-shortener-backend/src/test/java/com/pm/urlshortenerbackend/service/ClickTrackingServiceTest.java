@@ -56,8 +56,16 @@ public class ClickTrackingServiceTest {
         when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0");
         when(request.getHeader("Referer")).thenReturn("https://google.com");
 
+        // Create ClickEventData from request
+        com.pm.urlshortenerbackend.dto.ClickEventData clickEventData = 
+            new com.pm.urlshortenerbackend.dto.ClickEventData(
+                "192.168.1.1", 
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0", 
+                "https://google.com"
+            );
+        
         // Log click
-        clickTrackingService.logClick("test123", request);
+        clickTrackingService.logClick("test123", clickEventData);
 
         // Wait for async operation
         Thread.sleep(1000);

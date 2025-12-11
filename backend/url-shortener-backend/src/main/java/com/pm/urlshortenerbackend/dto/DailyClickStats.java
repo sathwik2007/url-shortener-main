@@ -1,6 +1,6 @@
 package com.pm.urlshortenerbackend.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * Author: Sathwik Pillalamarri
@@ -8,19 +8,19 @@ import java.time.LocalDateTime;
  * Project: url-shortener-backend
  */
 public class DailyClickStats {
-    private LocalDateTime date;
+    private LocalDate date;
     private Long clickCount;
 
-    public DailyClickStats(LocalDateTime date, Long clickCount) {
+    public DailyClickStats(LocalDate date, Long clickCount) {
         this.date = date;
         this.clickCount = clickCount;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

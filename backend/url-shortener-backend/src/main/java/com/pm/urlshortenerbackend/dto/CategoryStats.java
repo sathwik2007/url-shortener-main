@@ -8,10 +8,20 @@ package com.pm.urlshortenerbackend.dto;
 public class CategoryStats {
     private String category;
     private long count;
+    private double percentage;
+
+    public CategoryStats() {
+    }
 
     public CategoryStats(String category, long count) {
         this.category = category;
         this.count = count;
+    }
+
+    public CategoryStats(String category, long count, double percentage) {
+        this.category = category;
+        this.count = count;
+        this.percentage = percentage;
     }
 
     public String getCategory() {
@@ -28,5 +38,13 @@ public class CategoryStats {
 
     public void setCount(long count) {
         this.count = count;
+    }
+
+    public double getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(double percentage) {
+        this.percentage = percentage;
     }
 }
