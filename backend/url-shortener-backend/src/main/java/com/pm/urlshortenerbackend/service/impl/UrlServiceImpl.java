@@ -374,6 +374,72 @@ public class UrlServiceImpl implements UrlService {
         }
     }
 
+    @Override
+    @Transactional
+    public UrlMappingResponse updateUrl(String shortCode, CreateUrlRequest updateRequest, User user) {
+        logger.info("Updating URL shortCode: {} by user: {}", shortCode, user.getEmail());
+
+        validateUrlOwnership(shortCode, user);
+
+        UrlMapping urlMapping = repository.findByShortCode(shortCode)
+                .orElseThrow(() -> new UrlNotFoundException(shortCode));
+
+        if(updateRequest.getExpiresAt() != null) {
+            validateExpirationDate(updateRequest.getExpiresAt());
+            urlMapping.setExpiresAt(updateRequest.getExpiresAt());
+        }
+
+        repository.save(urlMapping);
+
+        if(cacheService != null) {
+            cacheService.delete(shortCode);
+        }
+        logger.info("Successfully updated URL shortCode: {}", shortCode);
+        return buildMappingResponse(urlMapping);
+    }
+
+    @Override
+    public void deactivateUrl(String shortCode, User user) {
+        logger.info("Deactivating URL shortCode: {} by user: {}", shortCode, user.getEmail());
+
+        validateUrlOwnership(shortCode, user);
+
+        UrlMapping urlMapping = repository.findByShortCode(shortCode)
+                .orElseThrow(() -> new UrlNotFoundException(shortCode));
+
+        urlMapping.setIsActive(false);
+        repository.save(urlMapping);
+
+        if(cacheService != null) {
+            cacheService.delete(shortCode);
+        }
+
+        logger.info("Successfully deactivated URL short: {}", shortCode);
+    }
+
+    @Override
+    public void reactivateUrl(String shortCode, User user) {
+        logger.info("Reactivating URL shortCode: {} by user: {}", shortCode, user.getEmail());
+
+        validateUrlOwnership(shortCode, user);
+
+        UrlMapping urlMapping = repository.findByShortCode(shortCode)
+                .orElseThrow(() -> new UrlNotFoundException(shortCode));
+
+        if(urlMapping.isExpired()) {
+            throw new UrlExpiredException(shortCode, "Cannot reactivate expired URL");
+        }
+
+        urlMapping.setIsActive(true);
+        repository.save(urlMapping);
+
+        if(cacheService != null) {
+            cacheService.delete(shortCode);
+        }
+
+        logger.info("Successfully reactivate URL shortCode: {}", shortCode);
+    }
+
     private String validateUrl(String url) {
         if(url == null || url.length() > maxLength) {
             throw new InvalidUrlException("URL is null or exceeds max length");

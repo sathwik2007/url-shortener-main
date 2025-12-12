@@ -47,4 +47,13 @@ public interface UrlService {
     List<UrlMapping> findExpiredUrls();
 
     int deactivateExpiredUrls();
+
+    // Updates URL properties
+    UrlMappingResponse updateUrl(String shortCode, CreateUrlRequest updateRequest, User user);
+
+    // Deactivates a URL
+    void deactivateUrl(String shortCode, User user);
+
+    // Reactivate a URL
+    void reactivateUrl(String shortCode, User user);
 }

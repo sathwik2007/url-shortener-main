@@ -5,6 +5,7 @@ import com.pm.urlshortenerbackend.security.JwtAuthenticationFilter;
 import com.pm.urlshortenerbackend.service.impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -67,11 +68,20 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
+                        //Public endpoints
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/{shortCode}").permitAll() // Public redirect
                         .requestMatchers("/api/{shortCode}").permitAll() // API Redirect
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // Anonymous URL creation allowed
+                        .requestMatchers(HttpMethod.POST, "/api/links").permitAll()
+                        // Authenticated operations
+                        .requestMatchers(HttpMethod.GET, "/api/links").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/links/*").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/links/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/links/*").authenticated()
+                        .requestMatchers("/api/links/*/stats/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 )
